@@ -1,0 +1,12 @@
+{% extends "stripped_base.html" %}
+{% block title %}Page not found{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block content %}
+  <h1 class="sans-font">404 - Page not found</h1>
+  <p class="sans-font">
+    The requested page does not exist. Check the URL bar for any typos.
+  </p>
+    <a href="/"><button class="btn btn-secondary">Go to home</button></a>
+{% endblock %}
