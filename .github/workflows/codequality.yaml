@@ -1,0 +1,34 @@
+name: format and linting
+
+on: 
+  push:
+    branches: [ i191905-dev ]
+
+jobs:
+  formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install black
+        run: pip install black
+      - name: Run black
+        run: black app.py
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v4
+        with:
+          author_name: ${{ github.actor }}
+          author_email: ${{ github.actor }}@users.noreply.github.com
+          message: "Format code with black"
+          add: "app.py"
+          branch: ${{ github.ref }}
+
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install pylint and other requirements
+        run: pip install -r requirements.txt
+      - name: Run pylint
+        run: pylint app.py

@@ -4,3 +4,5 @@ Jinja2
 beautifulsoup4
 psx-data-reader
 prophet
+black
+pylint

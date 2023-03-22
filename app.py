@@ -1,60 +1,86 @@
-from flask import Flask, jsonify, render_template
-from psx import stocks, tickers
 import datetime
 import requests
-from bs4 import BeautifulSoup as bs
-from prophet import Prophet
 import pandas as pd
+from prophet import Prophet
+from bs4 import BeautifulSoup as bs
+from psx import stocks, tickers
+from flask import Flask, jsonify, render_template
 
 app = Flask(__name__)
 
-stock_name = 'FFC'
+STOCK_NAME = "FFC"
 
 
 @app.errorhandler(404)
-def page_not_found(error):
-    return render_template('error.html'), 404
+def page_not_found(_):
+    """
+    Error handler route.
+    """
+    return render_template("error.html"), 404
 
 
-@app.route('/api/trend')
+@app.route("/api/trend")
 def trend():
-    ticker = tickers()
-    df = stocks(stock_name, start=datetime.date(
-        2022, 1, 1), end=datetime.date.today())
+    """
+    API route for stock trends data.
+    """
+    _ = tickers()
+    data_frame = stocks(
+        STOCK_NAME, start=datetime.date(2022, 1, 1), end=datetime.date.today()
+    )
     data = {
-        'x': [datetime.datetime.utcfromtimestamp(x/10**9).strftime('%Y-%m-%d') for x in df.index.to_numpy().tolist()],
-        'open': df['Open'].to_numpy().tolist(),
-        'close': df['Close'].to_numpy().tolist(),
-        'high': df['High'].to_numpy().tolist(),
-        'low': df['Low'].to_numpy().tolist(),
-        'increasing': {'line': {'color': 'green'}},
-        'decreasing': {'line': {'color': 'red'}},
-        'type': 'candlestick',
-        'xaxis': 'x',
-        'yaxis': 'y'
+        "x": [
+            datetime.datetime.utcfromtimestamp(x / 10**9).strftime("%Y-%m-%d")
+            for x in data_frame.index.to_numpy().tolist()
+        ],
+        "open": data_frame["Open"].to_numpy().tolist(),
+        "close": data_frame["Close"].to_numpy().tolist(),
+        "high": data_frame["High"].to_numpy().tolist(),
+        "low": data_frame["Low"].to_numpy().tolist(),
+        "increasing": {"line": {"color": "green"}},
+        "decreasing": {"line": {"color": "red"}},
+        "type": "candlestick",
+        "xaxis": "x",
+        "yaxis": "y",
     }
-    df2 = pd.DataFrame({'ds': [x.strftime('%Y-%m-%d')
-                       for x in df.index], 'y': df['Close']})
-    df2.index = [x for x in range(len(df2))]
+    df2 = pd.DataFrame(
+        {
+            "ds": [x.strftime("%Y-%m-%d") for x in data_frame.index],
+            "y": data_frame["Close"],
+        }
+    )
+    df2.index = list(range(len(df2)))
 
-    m = Prophet()
-    m.fit(df2)
-    future = m.make_future_dataframe(periods=0)
-    forecast = m.predict(future)
+    forecasting_model = Prophet()
+    forecasting_model.fit(df2)
+    future = forecasting_model.make_future_dataframe(periods=0)
+    forecast = forecasting_model.predict(future)
     pred = round(forecast.iloc[-1, 1], 2)
     print(pred)
-    return jsonify({'trend': data, 'prediction': pred})
+    return jsonify({"trend": data, "prediction": pred})
 
 
-@app.route('/')
+@app.route("/")
 def home():
-    soup = bs(requests.get(
-        f'https://dps.psx.com.pk/company/{stock_name}').content, 'html.parser')
-    section = soup.find('div', class_="section section--padded company")
-    lst = [section.find(class_='quote__close').contents[0][3:]]
-    for stat in section.find_all(class_='stats_item')[:4]:
-        lst.append(stat.find(class_='stats_value').contents[0])
-    return render_template('home.html', lst=lst, time=datetime.date.today().strftime('%Y-%m-%d'), stock_name=stock_name)
+    """
+    Home page route. Returns predictions as well as one-liner live data.
+    """
+    soup = bs(
+        requests.get(
+            f"https://dps.psx.com.pk/company/{STOCK_NAME}", timeout=10
+        ).content,
+        "html.parser",
+    )
+    section = soup.find("div", class_="section section--padded company")
+    lst = [section.find(class_="quote__close").contents[0][3:]]
+    for stat in section.find_all(class_="stats_item")[:4]:
+        lst.append(stat.find(class_="stats_value").contents[0])
+    return render_template(
+        "home.html",
+        lst=lst,
+        time=datetime.date.today().strftime("%Y-%m-%d"),
+        stock_name=STOCK_NAME,
+    )
 
 
-app.run(debug=True, use_debugger=False, use_reloader=False, host='0.0.0.0')
+app.run(debug=True, use_debugger=False, use_reloader=False, host="0.0.0.0")
