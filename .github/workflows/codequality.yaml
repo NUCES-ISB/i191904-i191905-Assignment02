@@ -2,7 +2,7 @@ name: format and linting
 
 on: 
   push:
-    branches: [ i191905-dev ]
+    branches: [ i191905-dev, main ]
 
 jobs:
   formatting:

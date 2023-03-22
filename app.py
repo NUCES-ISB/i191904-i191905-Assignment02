@@ -7,8 +7,21 @@ from psx import stocks, tickers
 from flask import Flask, jsonify, render_template
 
 app = Flask(__name__)
-
 STOCK_NAME = "FFC"
+
+_ = tickers()
+data_frame = stocks(
+    STOCK_NAME, start=datetime.date(2020, 1, 1), end=datetime.date.today()
+)
+df = pd.DataFrame(
+    {
+        "ds": [x.strftime("%Y-%m-%d") for x in data_frame.index],
+        "y": data_frame["Close"],
+    }
+)
+df.index = list(range(len(df)))
+forecasting_model = Prophet()
+forecasting_model.fit(df)
 
 
 @app.errorhandler(404)
@@ -20,14 +33,10 @@ def page_not_found(_):
 
 
 @app.route("/api/trend")
-def trend():
+def trend_api():
     """
     API route for stock trends data.
     """
-    _ = tickers()
-    data_frame = stocks(
-        STOCK_NAME, start=datetime.date(2022, 1, 1), end=datetime.date.today()
-    )
     data = {
         "x": [
             datetime.datetime.utcfromtimestamp(x / 10**9).strftime("%Y-%m-%d")
@@ -43,20 +52,9 @@ def trend():
         "xaxis": "x",
         "yaxis": "y",
     }
-    df2 = pd.DataFrame(
-        {
-            "ds": [x.strftime("%Y-%m-%d") for x in data_frame.index],
-            "y": data_frame["Close"],
-        }
-    )
-    df2.index = list(range(len(df2)))
-
-    forecasting_model = Prophet()
-    forecasting_model.fit(df2)
     future = forecasting_model.make_future_dataframe(periods=0)
     forecast = forecasting_model.predict(future)
     pred = round(forecast.iloc[-1, 1], 2)
-    print(pred)
     return jsonify({"trend": data, "prediction": pred})
 
 
