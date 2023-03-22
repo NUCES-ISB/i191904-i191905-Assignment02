@@ -1,0 +1,143 @@
+{% extends "stripped_base.html" %}
+{% block title %}Home{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block content %}
+<a href="/date-prediction">Get prediction on a given date ></a>
+<button type="submit" style="text-align: right; margin-left: auto; display: flex;" id="update-button"
+  onclick="updateData()">Retrain model on updated data</button>
+<h1>
+  Stock price prediction for {{ stock_name }}
+</h1>
+<p>(Predicted for date {{ time }})</p>
+<div class="row mb-3">
+  <div class="col-sm-4 box">
+    <p>
+      <b>Price:</b>
+    </p>
+    <p style="font-size: x-large;" id="prediction">
+      Loading prediction...
+    </p>
+  </div>
+  <div class="col-sm-2">
+  </div>
+  <div class="col-sm-6 box">
+    <p>
+      <b>Percentage error:</b>
+    </p>
+    <p style="font-size: x-large;" id="prediction-error">
+      Waiting to load prediction...
+    </p>
+  </div>
+</div>
+<h1>
+  Stock details for {{ stock_name }}
+</h1>
+<p>(As of {{ time }})</p>
+<div class="row mb-3">
+  <div class="col-sm-4 box">
+    <p>
+      <b>Price:</b>
+    </p>
+    <p style="font-size: x-large;" id="actual-price">
+      {{ lst.0 }}
+    </p>
+  </div>
+  <div class="col-sm-2 box">
+    <p>
+      Open:
+    </p>
+    <p style="font-size: x-large;">
+      {{ lst.1 }}
+    </p>
+  </div>
+  <div class="col-sm-2 box">
+    <p>
+      High:
+    </p>
+    <p style="font-size: x-large;">
+      {{ lst.2 }}
+    </p>
+  </div>
+  <div class="col-sm-2 box">
+    <p>
+      Low:
+    </p>
+    <p style="font-size: x-large;">
+      {{ lst.3 }}
+    </p>
+  </div>
+  <div class="col-sm-2 box">
+    <p>
+      Volume:
+    </p>
+    <p style="font-size: x-large;">
+      {{ lst.4 }}
+    </p>
+  </div>
+</div>
+<h1>
+  Stock trend for {{ stock_name }}
+</h1>
+<h2 id="loading-prompt" class="center-font" style="display: block; color: gray; font-style: italic;">Loading graph...
+</h2>
+<div id="plot_div" style="width: 100%; height: 720px;"></div>
+<script>
+  var layout = {
+    autosize: true,
+    dragmode: 'zoom',
+    xaxis: {
+      autorange: true,
+      rangeslider: {
+        visible: false
+      },
+      title: 'Date',
+      type: 'date'
+    },
+    yaxis: {
+      autorange: true,
+      title: 'Stock price',
+      type: 'linear'
+    },
+  };
+
+  var config = { responsive: true }
+  async function getAPI() {
+    await fetch("http://127.0.0.1:5000/api/trend")
+      .then(response => response.json())
+      .then(json => {
+        Plotly.newPlot('plot_div', [{
+          x: json.trend.x,
+          open: json.trend.open,
+          close: json.trend.close,
+          high: json.trend.high,
+          low: json.trend.low,
+          increasing: { line: { color: 'green' } },
+          decreasing: { line: { color: 'red' } },
+          type: 'candlestick',
+          xaxis: 'x',
+          yaxis: 'y'
+        }], layout, config);
+        document.getElementById("prediction").innerHTML = json.prediction;
+        var actual = parseInt(document.getElementById("actual-price").innerHTML)
+        document.getElementById("prediction-error").innerHTML = ((Math.abs(parseInt(json.prediction) - actual) / actual) * 100).toFixed(2) + '%';
+      })
+      .then(json => document.getElementById("loading-prompt").style.display = 'none')
+  }
+  getAPI();
+
+  async function updateData() {
+    document.getElementById("update-button").innerHTML = 'Updating, please wait...'
+    document.getElementById("update-button").disabled = true;
+    await fetch("http://127.0.0.1:5000/api/retrain")
+      .then(response => response.json())
+      .then(json => {
+        alert(json.message);
+      })
+      .then(json => {
+        setTimeout(() => { document.location.reload(); }, 1000);
+      })
+  }
+</script>
+{% endblock %}

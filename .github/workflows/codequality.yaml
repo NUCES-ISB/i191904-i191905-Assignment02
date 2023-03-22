@@ -2,8 +2,8 @@ name: format and linting
 
 on: 
   push:
-    branches: [ i191904-dev, main ]
-
+    branches: [ main ]
+    
 jobs:
   formatting:
     runs-on: ubuntu-latest
