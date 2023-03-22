@@ -104,7 +104,7 @@
 
   var config = { responsive: true }
   async function getAPI() {
-    await fetch("http://127.0.0.1:5000/api/trend")
+    await fetch("http://100.25.142.11:5000/api/trend")
       .then(response => response.json())
       .then(json => {
         Plotly.newPlot('plot_div', [{
@@ -130,7 +130,7 @@
   async function updateData() {
     document.getElementById("update-button").innerHTML = 'Updating, please wait...'
     document.getElementById("update-button").disabled = true;
-    await fetch("http://127.0.0.1:5000/api/retrain")
+    await fetch("http://100.25.142.11:5000/api/retrain")
       .then(response => response.json())
       .then(json => {
         alert(json.message);
