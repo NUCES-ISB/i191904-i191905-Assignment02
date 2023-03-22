@@ -1,0 +1,24 @@
+.body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.sans-font {
+    font-family: sans-serif;
+}
+
+.center-font {
+    text-align: center;
+}
+
+#content {
+    padding: 40px 10%;
+}
+
+.box {
+    padding: 0px 5px;
+    border: 2px solid;
+    border-color: grey;
+    border-radius: 8px;
+}

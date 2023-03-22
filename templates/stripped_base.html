@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="EN">
+  <head>
+    {% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='plotly-2.18.2.min.js') }}"></script>
+    <title>{% block title %}{% endblock %} - Stock Predictions</title>
+    {% endblock %}
+  </head>
+  <body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="#" style="margin-left: 5%; ">Stock Predictions</a>
+    </nav>
+
+    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="footer"  class="sans-font center-font">
+
+      <footer class="footer" style="position: fixed; bottom: 0px; padding: 20px; width: 100%;">
+          {% block footer %}
+          <div class="container">
+            <span class="text-muted">i191904, i191905 - Assignment 2</a></span>
+          </div>
+          {% endblock %}
+      </footer>
+    </div>
+  </body>
+</html>
