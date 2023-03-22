@@ -1,0 +1,56 @@
+{% extends "stripped_base.html" %}
+{% block title %}Home{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block content %}
+<a href="/">< Go back </a>
+<h1>
+  Stock price prediction for {{ stock_name }} at given date
+</h1>
+<br>
+<h3>
+  Enter date:
+</h3>
+
+<form id="date-form">
+  <input type="date" id="date-input" name="date" required>
+  <button type="submit">Submit</button>
+</form>
+<br>
+
+<div class="row mb-3">
+  <div class="col-sm-12 box">
+    <p>
+      <b>Predicted price:</b>
+    </p>
+    <p style="font-size: x-large;" id="prediction">
+      Input the date first!
+    </p>
+  </div>
+</div>
+<script>
+  window.addEventListener("load", () => {
+    function sendData() {
+      const XHR = new XMLHttpRequest();
+      const FD = new FormData(form);
+      XHR.addEventListener("load", (event) => {
+        document.getElementById("prediction").innerHTML = (JSON.parse(event.target.responseText).prediction).toFixed(2)
+        console.log(JSON.parse(event.target.responseText))
+      });
+      XHR.addEventListener("error", (event) => {
+        alert('Oops! Something went wrong.');
+      });
+      XHR.open("POST", "http://127.0.0.1:5000/api/date-prediction");
+      XHR.send(FD);
+    }
+    const form = document.getElementById("date-form");
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      sendData();
+    });
+  });
+
+</script>
+{% endblock %}
