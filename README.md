@@ -12,7 +12,7 @@ How to run:
 <li>Install requirements:
 <ul>
 <li>Change directory into the cloned repository folder.</li>
-<li>Run <code>pip install -r requirements.txt</code> in order to install the required packages.</li>
+<li>Run <code>pip install -r requirements.txt</code> in order to install the required packages and dependencies.</li>
 </ul>
 <li>Run the app
 <ul>
